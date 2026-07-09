@@ -1,63 +1,33 @@
-const textTop = document.getElementById('text-top');
-const textBottom = document.getElementById('text-bottom');
-const langTop = document.getElementById('langTop');
-const langBottom = document.getElementById('langBottom');
-const engineSelect = document.getElementById('engineSelect');
+const textTop = document.getElementById('text-top'), textBottom = document.getElementById('text-bottom');
+const bgCol = document.getElementById('bgCol'), colInact = document.getElementById('colInact'), colAct = document.getElementById('colAct');
 
-// Gestion des couleurs
-const colorInactif = document.getElementById('colorInactif');
-const colorActif = document.getElementById('colorActif');
+function setNom(id) {
+    const nom = prompt("Entrez votre nom/initiale :");
+    if (nom) document.getElementById(id).innerText = nom.charAt(0).toUpperCase();
+}
 
-function updateButtonColors(btn, isActive) {
-    btn.style.backgroundColor = isActive ? colorActif.value : colorInactif.value;
+bgCol.addEventListener('input', (e) => {
+    document.getElementById('zoneTop').style.backgroundColor = e.target.value;
+    document.getElementById('zoneBottom').style.backgroundColor = e.target.value;
+});
+
+function updateBtn(btn, active) {
+    btn.style.backgroundColor = active ? colAct.value : colInact.value;
 }
 
 async function lancerTraduction(cote) {
-    const btn = (cote === 'top') ? document.getElementById('btnTop') : document.getElementById('btnBottom');
-    const sourceCode = (cote === 'top') ? langTop.value : langBottom.value;
-    const cibleCode = (cote === 'top') ? langBottom.value : langTop.value;
-
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = sourceCode;
+    const btn = document.getElementById(cote === 'top' ? 'btnTop' : 'btnBottom');
+    const source = document.getElementById(cote === 'top' ? 'langTop' : 'langBottom').value;
+    const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     
-    recognition.onstart = () => {
-        btn.classList.add('active');
-        updateButtonColors(btn, true);
-    };
+    rec.onstart = () => { btn.classList.add('active'); updateBtn(btn, true); };
+    rec.onend = () => { btn.classList.remove('active'); updateBtn(btn, false); };
+    rec.start();
 
-    recognition.onend = () => {
-        btn.classList.remove('active');
-        updateButtonColors(btn, false);
-    };
-
-    recognition.start();
-
-    recognition.onresult = async (event) => {
-        const texte = event.results[0][0].transcript;
-        
-        const response = await fetch('/api/traductions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                texte, 
-                source: sourceCode.split('-')[0], 
-                cible: cibleCode.split('-')[0], 
-                moteur: engineSelect.value 
-            })
-        });
-        
-        const data = await response.json();
-        if (cote === 'top') { textTop.innerText = texte; textBottom.innerText = data.traduction; }
-        else { textBottom.innerText = texte; textTop.innerText = data.traduction; }
-        
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(data.traduction);
-        utterance.lang = cibleCode;
-        window.speechSynthesis.speak(utterance);
+    rec.onresult = async (e) => {
+        const res = await fetch('/api/traductions', { method: 'POST', body: JSON.stringify({ texte: e.results[0][0].transcript, source: source.split('-')[0], cible: (source==='fr-FR'?'pt':'fr'), moteur: 'GLOBAL' }), headers:{'Content-Type':'application/json'}});
+        const data = await res.json();
+        if (cote === 'top') { textTop.innerText = e.results[0][0].transcript; textBottom.innerText = data.traduction; }
+        else { textBottom.innerText = e.results[0][0].transcript; textTop.innerText = data.traduction; }
     };
 }
-
-// Initialisation des couleurs au chargement
-document.querySelectorAll('.btn-record').forEach(btn => updateButtonColors(btn, false));
-colorInactif.addEventListener('input', () => document.querySelectorAll('.btn-record').forEach(b => !b.classList.contains('active') && updateButtonColors(b, false)));
-colorActif.addEventListener('input', () => document.querySelectorAll('.btn-record').forEach(b => b.classList.contains('active') && updateButtonColors(b, true)));

@@ -5,65 +5,41 @@
     <title>Traducteur Pro Multi-Moteur</title>
     <style>
         body { margin: 0; height: 100vh; display: flex; flex-direction: column; font-family: sans-serif; background: #2c3e50; }
-        .engine-selector { background: #34495e; color: white; padding: 10px; text-align: center; }
-        .zone { height: 40%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
+        .settings-panel { padding: 10px; background: #333; color: white; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; font-size: 0.8rem; }
+        .zone { height: 40%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; position: relative; }
         .controls { height: 10%; background: #ecf0f1; display: flex; align-items: center; justify-content: space-around; }
         .top { transform: rotate(180deg); background: #34495e; color: white; }
         .bottom { background: #ffffff; color: #2c3e50; }
-        .text-display { font-size: 1.2rem; font-weight: bold; text-align: center; margin: 10px; }
+        .text-display { font-size: 2.5rem; font-weight: bold; text-align: center; margin: 10px; }
         
-        /* Nouveau design du bouton */
-        .btn-record {
-            background-color: #FFD700; /* Jaune par défaut */
-            border-radius: 50px;
-            padding: 10px 25px;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: background-color 0.3s ease;
-        }
+        .user-icon { width: 50px; height: 50px; border-radius: 50%; background: #95a5a6; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 1.5rem; }
+        
+        .btn-record { background-color: #FFD700; border-radius: 50px; padding: 15px 30px; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
         .indicator { width: 15px; height: 15px; background-color: red; border-radius: 2px; }
-        .btn-record.active { background-color: #007BFF; } /* Bleu actif */
+        .btn-record.active { background-color: #007BFF; }
         .btn-record.active .indicator { background-color: green; }
-
-        /* Panneau de couleurs */
-        .color-panel { padding: 10px; background: #ddd; text-align: center; font-size: 0.8rem; }
     </style>
 </head>
 <body>
-    <div class="engine-selector">
-        Moteur : 
-        <select id="engineSelect">
-            <option value="GLOBAL">Global (MyMemory)</option>
-            <option value="CHINE">Chine (Simulé)</option>
-        </select>
+    <div class="settings-panel">
+        <div>Fond: <input type="color" id="bgCol" value="#2c3e50"></div>
+        <div>Inactif: <input type="color" id="colInact" value="#FFD700"></div>
+        <div>Actif: <input type="color" id="colAct" value="#007BFF"></div>
     </div>
     
-    <div class="color-panel">
-        Couleurs : Inactif <input type="color" id="colorInactif" value="#FFD700"> | 
-        Actif <input type="color" id="colorActif" value="#007BFF">
-    </div>
-
-    <div class="zone top">
+    <div class="zone top" id="zoneTop">
+        <div class="user-icon" id="userTop" onclick="setNom('userTop')">I</div>
         <div id="text-top" class="text-display">Appuyez pour parler</div>
-        <button id="btnTop" class="btn-record" onclick="lancerTraduction('top')">
-            <span class="icon">🎤</span>
-            <span class="indicator"></span>
-        </button>
+        <button id="btnTop" class="btn-record" onclick="lancerTraduction('top')"><span class="indicator"></span></button>
     </div>
     <div class="controls">
         <select id="langTop"><option value="pt-BR">Portugais</option><option value="fr-FR">Français</option></select>
-        <span> ↔ </span>
         <select id="langBottom"><option value="fr-FR">Français</option><option value="pt-BR">Portugais</option></select>
     </div>
-    <div class="zone bottom">
-        <button id="btnBottom" class="btn-record" onclick="lancerTraduction('bottom')">
-            <span class="icon">🎤</span>
-            <span class="indicator"></span>
-        </button>
+    <div class="zone bottom" id="zoneBottom">
+        <button id="btnBottom" class="btn-record" onclick="lancerTraduction('bottom')"><span class="indicator"></span></button>
         <div id="text-bottom" class="text-display">Appuyez pour parler</div>
+        <div class="user-icon" id="userBottom" onclick="setNom('userBottom')">I</div>
     </div>
     <script src="script.js"></script>
 </body>
